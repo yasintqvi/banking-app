@@ -4,11 +4,13 @@ import (
 	"github.com/yasintaqvi/banking-app-with-hexagonal-architecture/domain"
 	"github.com/yasintaqvi/banking-app-with-hexagonal-architecture/dto"
 	"github.com/yasintaqvi/banking-app-with-hexagonal-architecture/errs"
+	"github.com/yasintaqvi/banking-app-with-hexagonal-architecture/logger"
 	"time"
 )
 
 type AccountService interface {
 	CreateAccount(createAccountDto dto.CreateAccountRequestDto) (*dto.CreateAccountResponseDto, *errs.AppError)
+	CreateTransaction(*dto.CreateTransactionRequestDto) (*dto.CreateTransactionResponse, *errs.AppError)
 }
 
 type DefaultAccountService struct {
@@ -38,6 +40,34 @@ func (accountService DefaultAccountService) CreateAccount(createAccountDto dto.C
 		response := account.ToCreateAccountResponseDto()
 		return response, nil
 	}
+}
+
+func (accountService DefaultAccountService) CreateTransaction(createTransactionDto *dto.CreateTransactionRequestDto) (*dto.CreateTransactionResponse, *errs.AppError) {
+
+	createTransactionDto.Validate()
+
+	account, _ := accountService.repo.FindById(createTransactionDto.AccountId)
+
+	if !account.CanWithdraw(createTransactionDto.Amount) {
+		logger.Error("Insufficient balance in the account")
+		return nil, errs.NewValidationError("Insufficient balance in the account")
+	}
+
+	newTransaction := &domain.Transaction{
+		TransactionId:   "",
+		AccountId:       createTransactionDto.AccountId,
+		Amount:          createTransactionDto.Amount,
+		TransactionType: createTransactionDto.TransactionType,
+		TransactionDate: createTransactionDto.TransactionDate,
+	}
+
+	transaction, appError := accountService.repo.SaveTransaction(newTransaction)
+	if appError != nil {
+		return nil, appError
+	}
+	response := transaction.ToDto()
+
+	return response, nil
 }
 
 func NewAccountService(repo domain.AccountRepository) *DefaultAccountService {

@@ -6,6 +6,7 @@ import (
 	"github.com/yasintaqvi/banking-app-with-hexagonal-architecture/dto"
 	"github.com/yasintaqvi/banking-app-with-hexagonal-architecture/service"
 	"net/http"
+	"time"
 )
 
 type AccountHandler struct {
@@ -32,6 +33,31 @@ func (accountHandler AccountHandler) CreateAccount(w http.ResponseWriter, r *htt
 			writeHttpResponse(w, err.Code, err.AsMessage())
 		} else {
 			writeHttpResponse(w, http.StatusCreated, account)
+		}
+	}
+}
+
+func (accountHandler AccountHandler) CreateTransaction(writer http.ResponseWriter, request *http.Request) {
+	vars := mux.Vars(request)
+	customerId, _ := vars["customer_id"]
+	accountId, _ := vars["account_id"]
+
+	// decode incoming request
+	var createTransactionDto dto.CreateTransactionRequestDto
+	if err := json.NewDecoder(request.Body).Decode(&createTransactionDto); err != nil {
+		writeHttpResponse(writer, http.StatusBadRequest, err.Error())
+	} else {
+
+		createTransactionDto.AccountId = accountId
+		createTransactionDto.CustomerId = customerId
+		createTransactionDto.TransactionDate = time.Now().Format("2006-01-02 15:04:05")
+
+		account, appError := accountHandler.service.CreateTransaction(&createTransactionDto)
+
+		if appError != nil {
+			writeHttpResponse(writer, appError.Code, appError.AsMessage())
+		} else {
+			writeHttpResponse(writer, http.StatusOK, account)
 		}
 	}
 }

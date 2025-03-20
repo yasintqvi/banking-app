@@ -47,9 +47,10 @@ func Start() {
 	customerHandler := CustomerHandler{service.NewCustomerService(customerRepo)}
 	accountHandler := AccountHandler{service.NewAccountService(accountRepo)}
 
-	router.HandleFunc("/api/customers", customerHandler.GetAllCustomers).Methods("GET")
-	router.HandleFunc("/api/customers/{customer_id:[0-9]+}", customerHandler.GetCustomer).Methods("GET")
-	router.HandleFunc("/api/customers/{customer_id:[0-9]+}/account", accountHandler.CreateAccount).Methods("POST")
+	router.HandleFunc("/api/customers", customerHandler.GetAllCustomers).Methods(http.MethodGet)
+	router.HandleFunc("/api/customers/{customer_id:[0-9]+}", customerHandler.GetCustomer).Methods(http.MethodGet)
+	router.HandleFunc("/api/customers/{customer_id:[0-9]+}/account", accountHandler.CreateAccount).Methods(http.MethodPost)
+	router.HandleFunc("/api/customers/{customer_id:[0-9]+}/account/{account_id:[0-9]+}", accountHandler.CreateTransaction).Methods(http.MethodPost)
 
 	serverAddress := fmt.Sprintf("%s:%s", os.Getenv("SERVER_ADDRESS"), os.Getenv("SERVER_PORT"))
 
