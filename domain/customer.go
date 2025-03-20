@@ -6,7 +6,7 @@ import (
 )
 
 type Customer struct {
-	ID          string `json:"id" db:"customer_id"`
+	CustomerId  string `json:"id" db:"customer_id"`
 	Name        string `json:"name"`
 	City        string `json:"city"`
 	ZipCode     string `json:"zipCode"`
@@ -24,7 +24,7 @@ func (customer Customer) statusAsText() string {
 
 func (customer Customer) ToDto() dto.CustomerResponse {
 	return dto.CustomerResponse{
-		Id:          customer.ID,
+		Id:          customer.CustomerId,
 		Name:        customer.Name,
 		City:        customer.City,
 		ZipCode:     customer.ZipCode,

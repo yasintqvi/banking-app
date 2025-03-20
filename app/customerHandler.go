@@ -15,9 +15,9 @@ func (handler CustomerHandler) GetAllCustomers(writer http.ResponseWriter, reque
 	customers, err := handler.service.GetAllCustomer()
 
 	if err != nil {
-		getHttpResponse(writer, err.Code, err.AsMessage())
+		writeHttpResponse(writer, err.Code, err.AsMessage())
 	} else {
-		getHttpResponse(writer, http.StatusOK, customers)
+		writeHttpResponse(writer, http.StatusOK, customers)
 	}
 }
 
@@ -31,13 +31,13 @@ func (handler CustomerHandler) GetCustomer(writer http.ResponseWriter, request *
 	request.Header.Set("Content-Type", "application/json")
 
 	if err != nil {
-		getHttpResponse(writer, err.Code, err.AsMessage())
+		writeHttpResponse(writer, err.Code, err.AsMessage())
 	} else {
-		getHttpResponse(writer, http.StatusOK, customer)
+		writeHttpResponse(writer, http.StatusOK, customer)
 	}
 }
 
-func getHttpResponse(writer http.ResponseWriter, code int, data interface{}) {
+func writeHttpResponse(writer http.ResponseWriter, code int, data interface{}) {
 
 	writer.Header().Set("Content-Type", "application/json")
 
